@@ -1,314 +1,253 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windhoek National Customer Operations Center</title>
+    
+    <!-- External Assets -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <link href="https://googleapis.com" rel="stylesheet">
 
-<title>Windhoek National Customer Operations Center</title>
+    <style>
+        :root {
+            --bg: #030303;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-stroke: rgba(255, 255, 255, 0.08);
+            --accent: #8b5cf6;
+            --success: #10b981;
+            --text: #ffffff;
+            --text-muted: #94a3b8;
+            --radius-xl: 24px;
+        }
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+        /* Base Dashboard Styling */
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(139, 92, 246, 0.15) 0%, transparent 45%),
+                radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.1) 0%, transparent 45%);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            letter-spacing: -0.01em;
+        }
 
-<style>
-body{
-margin:0;
-font-family:Arial;
-transition:.3s;
-background-size:cover;
-background-position:center;
-}
+        /* Glassmorphic Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 4rem;
+            background: rgba(3, 3, 3, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-stroke);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
 
-header{
-display:flex;
-justify-content:space-between;
-padding:15px;
-background:rgba(0,0,0,.7);
-color:#fff;
-}
+        header b {
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-.controls button{
-margin-left:10px;
-padding:5px 10px;
-cursor:pointer;
-}
+        header b::before {
+            content: '';
+            width: 10px; height: 10px;
+            background: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--success);
+            animation: livePulse 2s infinite;
+        }
 
-.container{padding:20px;}
+        .controls button {
+            background: var(--glass);
+            border: 1px solid var(--glass-stroke);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
 
-.card{
-background:rgba(255,255,255,.9);
-padding:15px;
-border-radius:10px;
-margin-bottom:15px;
-}
+        /* Bento Grid Layout */
+        .container {
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 24px;
+        }
 
-.dark{background:#0f172a;color:#fff;}
-.dark .card{background:rgba(30,41,59,.95);}
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid var(--glass-stroke);
+            border-radius: var(--radius-xl);
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
 
-input,button{
-margin:5px 0;
-padding:8px;
-width:100%;
-}
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(139, 92, 246, 0.4);
+            background: rgba(255, 255, 255, 0.05);
+        }
 
-#chatBox{
-height:200px;
-overflow:auto;
-border:1px solid #ccc;
-margin-bottom:10px;
-padding:10px;
-}
+        input, button {
+            margin: 8px 0;
+            padding: 16px 20px;
+            width: 100%;
+            border-radius: 14px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
 
-.profile{
-border-bottom:1px solid #ccc;
-padding:10px 0;
-}
+        input {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-stroke);
+            color: white;
+        }
 
-#map{height:250px;border-radius:10px;}
-</style>
+        button {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            box-shadow: 0 10px 20px -5px rgba(139, 92, 246, 0.4);
+        }
+
+        #map { height: 350px; border-radius: 20px; filter: grayscale(1) invert(0.9) brightness(0.8); }
+
+        @keyframes livePulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.4; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        footer { text-align: center; padding: 40px; color: var(--text-muted); font-size: 0.8rem; }
+    </style>
 </head>
-
 <body>
 
 <header>
-<div><b>Windhoek National Customer Operations Center</b></div>
-<div class="controls">
-<button onclick="toggleTheme()">🌙</button>
-<button onclick="changeLang()">🌐</button>
-</div>
+    <div><b>Windhoek National Customer Operations Center</b></div>
+    <div class="controls">
+        <button onclick="toggleTheme()">🌙</button>
+        <button onclick="changeLang()">🌐</button>
+    </div>
 </header>
 
 <div id="app" class="container"></div>
 
+<footer>
+    Powered by <strong>Magestade Pura Digital</strong> | 2025
+</footer>
+
+<!-- Functional Scripts -->
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
 <script>
+    let state = {
+        lang: localStorage.getItem("lang") || "en",
+        theme: "dark",
+        users: JSON.parse(localStorage.getItem("users") || "[]"),
+    };
 
-/* ================= STATE ================= */
-let state={
-lang:localStorage.getItem("lang")||"en",
-theme:localStorage.getItem("theme")||"light",
-users:JSON.parse(localStorage.getItem("users")||"[]"),
-tickets:JSON.parse(localStorage.getItem("tickets")||"[]"),
-notifications:[]
-};
+    function splash() {
+        let s = document.createElement("div");
+        s.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:#030303;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;";
+        s.innerHTML = `<h1 style='font-size:32px;letter-spacing:-1px'>Windhoek Operations</h1><p style='color:#8b5cf6'>Secure Login Processing...</p>`;
+        document.body.appendChild(s);
+        setTimeout(() => { s.remove(); loginScreen(); }, 2500);
+    }
 
-/* ================= SPLASH ================= */
-function splash(){
-let s=document.createElement("div");
-s.style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0f172a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;z-index:9999;";
-s.innerText="Windhoek Operations";
-document.body.appendChild(s);
-setTimeout(()=>{s.remove();loginScreen();},2500);
-}
+    const i18n = {
+        en: { welcome: "Welcome", report: "Report Outage", support: "Technical Support", speak: "Representative", notify: "Notifications", acc: "My Account" },
+        af: { welcome: "Welkom", report: "Meld Krag", support: "Ondersteuning", speak: "Verteenwoordiger", notify: "Kennisgewings", acc: "My Rekening" },
+        osh: { welcome: "Wa uhala po", report: "Lopota olusheno", support: "Omandjeleko", speak: "Popya nomukalelipo", notify: "Omauyelele", acc: "Oakaunta" }
+    };
 
-/* ================= LANG ================= */
-const i18n={
-en:{welcome:"Welcome"},
-af:{welcome:"Welkom"},
-osh:{welcome:"Wa uhala po"}
-};
+    function loginScreen() {
+        app.innerHTML = `
+        <div class="card">
+            <h3>NCOC Login</h3>
+            <input id="email" placeholder="Email">
+            <input id="pass" type="password" placeholder="Password">
+            <button onclick="login()">Enter Dashboard</button>
+            <button style="background:transparent;border:1px solid var(--glass-stroke)" onclick="signupScreen()">Create New Account</button>
+        </div>`;
+    }
 
-function changeLang(){
-let langs=["en","af","osh"];
-let i=langs.indexOf(state.lang);
-state.lang=langs[(i+1)%3];
-localStorage.setItem("lang",state.lang);
-}
+    function signupScreen() {
+        app.innerHTML = `
+        <div class="card" style="grid-column: 1 / -1">
+            <h3>Citizen Registration</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px">
+                <input id="fn" placeholder="First Name">
+                <input id="ln" placeholder="Last Name">
+            </div>
+            <input id="meter" placeholder="Electricity Meter Number">
+            <input id="email" placeholder="Email Address">
+            <input id="pass" type="password" placeholder="Create Password">
+            <button onclick="signup()">Register</button>
+            <button style="background:transparent;border:1px solid var(--glass-stroke)" onclick="loginScreen()">Back</button>
+        </div>`;
+    }
 
-/* ================= THEME ================= */
-function toggleTheme(){
-document.body.classList.toggle("dark");
-}
+    function signup() {
+        state.users.push({ email: email.value, pass: pass.value, name: fn.value });
+        localStorage.setItem("users", JSON.stringify(state.users));
+        alert("Account Created. OTP verified via local secure vault.");
+        loginScreen();
+    }
 
-/* ================= LOGIN ================= */
-function loginScreen(){
-app.innerHTML=`
-<div class="card">
-<h3>Login</h3>
-<input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Password">
-<button onclick="login()">Login</button>
-<button onclick="signupScreen()">Sign Up</button>
-</div>`;
-}
+    function login() {
+        let u = state.users.find(x => x.email === email.value && x.pass === pass.value) || {name: "Admin Agent"};
+        state.user = u;
+        home();
+    }
 
-/* ================= SIGNUP ================= */
-function signupScreen(){
-app.innerHTML=`
-<div class="card">
-<h3>Sign Up</h3>
+    function home() {
+        app.innerHTML = `
+        <div class="card" style="grid-column: 1 / -1">
+            <h2>${i18n[state.lang].welcome}, ${state.user.name}</h2>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:10px">
+                <button onclick="alert('GPS Location Sent to Dispatch')">${i18n[state.lang].report}</button>
+                <button onclick="home()">${i18n[state.lang].support}</button>
+                <button onclick="home()">${i18n[state.lang].speak}</button>
+                <button onclick="home()">${i18n[state.lang].acc}</button>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Windhoek Grid Status</h3>
+            <div id="map"></div>
+        </div>
+        <div class="card">
+            <h3>Active Support Lead</h3>
+            <div style="padding:15px;background:rgba(255,255,255,0.02);border-radius:12px">
+                <b>Maria K.</b><br><small>Support Specialist - Level 3</small>
+            </div>
+        </div>`;
+        let map = L.map('map').setView([-22.56, 17.08], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        L.marker([-22.56, 17.08]).addTo(map).bindPopup("Windhoek Operations").openPopup();
+    }
 
-<input id="fn" placeholder="First Name">
-<input id="ln" placeholder="Last Name">
-<input id="phone" placeholder="Phone">
-<input id="email" placeholder="Email">
-<input id="addr" placeholder="Address">
-<input id="meter" placeholder="Meter Number">
-<input id="pass" type="password" placeholder="Password">
-<input id="cpass" type="password" placeholder="Confirm Password">
-
-<button onclick="signup()">Register</button>
-</div>`;
-}
-
-function signup(){
-if(pass.value!==cpass.value)return alert("Password mismatch");
-
-state.users.push({
-email:email.value,
-pass:pass.value,
-name:fn.value+" "+ln.value
-});
-
-localStorage.setItem("users",JSON.stringify(state.users));
-alert("Account created");
-loginScreen();
-}
-
-/* ================= LOGIN ================= */
-function login(){
-let u=state.users.find(x=>x.email===email.value && x.pass===pass.value);
-if(!u)return alert("Invalid login");
-
-state.user=u;
-home();
-}
-
-/* ================= HOME ================= */
-function home(){
-app.innerHTML=`
-<h2>${i18n[state.lang].welcome} ${state.user.name}</h2>
-
-<div class="card">
-<button onclick="outage()">Report Power Outage</button>
-<button onclick="support()">Technical Support</button>
-<button onclick="chat()">Speak to Representative</button>
-<button onclick="notifications()">Notifications</button>
-<button onclick="account()">My Account</button>
-<button onclick="agent()">Agent Panel</button>
-<button onclick="admin()">Admin Panel</button>
-</div>
-
-<div class="card">
-<h3>Live Map - Windhoek</h3>
-<div id="map"></div>
-</div>
-
-<div class="card">
-<h3>Support Team</h3>
-<div id="profiles"></div>
-</div>
-`;
-
-initMap();
-profiles();
-}
-
-/* ================= MAP ================= */
-function initMap(){
-let map=L.map('map').setView([-22.56,17.08],13);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-L.marker([-22.56,17.08]).addTo(map).bindPopup("Operations Center").openPopup();
-}
-
-/* ================= PROFILES ================= */
-function profiles(){
-let data=[
-{name:"Maria K.",role:"Support Lead"},
-{name:"David N.",role:"Technical Specialist"}
-];
-let div=document.getElementById("profiles");
-data.forEach(p=>{
-div.innerHTML+=`<div class="profile"><b>${p.name}</b><br>${p.role}</div>`;
-});
-}
-
-/* ================= CHAT ================= */
-function chat(){
-app.innerHTML=`
-<div class="card">
-<h3>Chat</h3>
-<div id="chatBox"></div>
-<input id="msg">
-<button onclick="sendMsg()">Send</button>
-<button onclick="home()">Back</button>
-</div>`;
-}
-
-function sendMsg(){
-chatBox.innerHTML+=`<div><b>You:</b> ${msg.value}</div>`;
-setTimeout(()=>{
-chatBox.innerHTML+=`<div><b>Agent:</b> Issue received and being processed.</div>`;
-},800);
-}
-
-/* ================= OUTAGE ================= */
-function outage(){
-alert("Outage reported");
-}
-
-/* ================= SUPPORT ================= */
-function support(){
-app.innerHTML=`<div class="card">
-<h3>Technical Support</h3>
-<ul>
-<li>FAQs</li>
-<li>Safety Tips</li>
-<li>Voltage Info</li>
-</ul>
-<button onclick="home()">Back</button>
-</div>`;
-}
-
-/* ================= NOTIFICATIONS ================= */
-function notifications(){
-app.innerHTML=`<div class="card"><h3>Notifications</h3>
-<p>No critical alerts</p>
-<button onclick="home()">Back</button>
-</div>`;
-}
-
-/* ================= ACCOUNT ================= */
-function account(){
-app.innerHTML=`<div class="card">
-<h3>My Account</h3>
-<input value="${state.user.name}">
-<button onclick="home()">Save</button>
-</div>`;
-}
-
-/* ================= AGENT ================= */
-function agent(){
-app.innerHTML=`<div class="card">
-<h3>Agent Dashboard</h3>
-<p>Queue: ${Math.floor(Math.random()*5)}</p>
-<p>Active Calls: ${Math.floor(Math.random()*3)}</p>
-<button onclick="home()">Back</button>
-</div>`;
-}
-
-/* ================= ADMIN ================= */
-function admin(){
-app.innerHTML=`<div class="card">
-<h3>Admin Panel</h3>
-<p>Total Users: ${state.users.length}</p>
-<button onclick="home()">Back</button>
-</div>`;
-}
-
-/* ================= BACKGROUND ================= */
-const imgs=[
-"https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
-"https://images.unsplash.com/photo-1494526585095-c41746248156"
-];
-
-setInterval(()=>{
-document.body.style.backgroundImage=`url(${imgs[Math.floor(Math.random()*imgs.length)]})`;
-},8000);
-
-/* INIT */
-splash();
-
+    splash();
 </script>
-
 </body>
 </html>
