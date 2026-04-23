@@ -3,76 +3,87 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Windhoek National Customer Operations Center</title>
+<title>National Digital Operations Platform</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 <style>
+:root{
+--bg:#f4f6fb;
+--card:#ffffff;
+--text:#111827;
+--primary:#1d4ed8;
+}
+
+body.dark{
+--bg:#0b1220;
+--card:#1e293b;
+--text:#ffffff;
+--primary:#38bdf8;
+}
+
 body{
 margin:0;
 font-family:Arial;
+background:var(--bg);
+color:var(--text);
 transition:.3s;
-background-size:cover;
-background-position:center;
 }
 
 header{
 display:flex;
 justify-content:space-between;
-padding:15px;
-background:rgba(0,0,0,.7);
-color:#fff;
+align-items:center;
+padding:12px;
+background:#0f172a;
+color:white;
 }
 
 .controls button{
-margin-left:10px;
-padding:5px 10px;
+margin-left:6px;
+padding:6px 10px;
+border:none;
 cursor:pointer;
+border-radius:5px;
 }
 
-.container{padding:20px;}
+.container{padding:14px;}
 
 .card{
-background:rgba(255,255,255,.9);
-padding:15px;
-border-radius:10px;
-margin-bottom:15px;
+background:var(--card);
+padding:14px;
+border-radius:12px;
+margin-bottom:12px;
+box-shadow:0 2px 10px rgba(0,0,0,.06);
 }
 
-.dark{background:#0f172a;color:#fff;}
-.dark .card{background:rgba(30,41,59,.95);}
-
 input,button{
-margin:5px 0;
-padding:8px;
 width:100%;
+padding:8px;
+margin:5px 0;
+border-radius:6px;
+border:1px solid #ccc;
 }
 
 #chatBox{
-height:200px;
+height:220px;
 overflow:auto;
-border:1px solid #ccc;
-margin-bottom:10px;
-padding:10px;
+border:1px solid #ddd;
+padding:8px;
+background:var(--card);
 }
 
-.profile{
-border-bottom:1px solid #ccc;
-padding:10px 0;
-}
-
-#map{height:250px;border-radius:10px;}
+#map{height:260px;border-radius:12px;}
 </style>
 </head>
 
 <body>
 
 <header>
-<div><b>Windhoek National Customer Operations Center</b></div>
+<div><b>National Operations Platform</b></div>
 <div class="controls">
 <button onclick="toggleTheme()">🌙</button>
-<button onclick="changeLang()">🌐</button>
+<button onclick="switchLang()">🌍</button>
 </div>
 </header>
 
@@ -82,60 +93,72 @@ padding:10px 0;
 
 <script>
 
-/* ================= STATE ================= */
-let state={
-lang:localStorage.getItem("lang")||"en",
-theme:localStorage.getItem("theme")||"light",
-users:JSON.parse(localStorage.getItem("users")||"[]"),
-tickets:JSON.parse(localStorage.getItem("tickets")||"[]"),
-notifications:[]
+/* ================= GLOBAL STATE ================= */
+let state = {
+lang: localStorage.getItem("lang") || "en",
+theme: localStorage.getItem("theme") || "light",
+sessionId: localStorage.getItem("sessionId") || null,
+db: JSON.parse(localStorage.getItem("db") || JSON.stringify({
+citizens:[],
+logs:[],
+events:[]
+}))
 };
 
-/* ================= SPLASH ================= */
-function splash(){
-let s=document.createElement("div");
-s.style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0f172a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;z-index:9999;";
-s.innerText="Windhoek Operations";
-document.body.appendChild(s);
-setTimeout(()=>{s.remove();loginScreen();},2500);
+function save(){
+localStorage.setItem("db",JSON.stringify(state.db));
+localStorage.setItem("sessionId",state.sessionId);
+localStorage.setItem("lang",state.lang);
+localStorage.setItem("theme",state.theme);
 }
 
 /* ================= LANG ================= */
-const i18n={
-en:{welcome:"Welcome"},
-af:{welcome:"Welkom"},
-osh:{welcome:"Wa uhala po"}
+const L={
+en:{login:"Login",signup:"Sign Up",welcome:"Welcome",chat:"Chat",back:"Back"},
+af:{login:"Aanmeld",signup:"Registreer",welcome:"Welkom",chat:"Gesels",back:"Terug"},
+osh:{login:"Log in",signup:"Sign up",welcome:"Wa uhala po",chat:"Ombi",back:"Shuna"}
 };
 
-function changeLang(){
-let langs=["en","af","osh"];
-let i=langs.indexOf(state.lang);
-state.lang=langs[(i+1)%3];
-localStorage.setItem("lang",state.lang);
+/* ================= USER ================= */
+function user(){
+return state.db.citizens.find(u=>u.email===state.sessionId);
 }
 
-/* ================= THEME ================= */
-function toggleTheme(){
-document.body.classList.toggle("dark");
+/* ================= INIT ================= */
+function init(){
+document.body.className = state.theme==="dark"?"dark":"";
+if(state.sessionId) home();
+else login();
 }
+init();
 
 /* ================= LOGIN ================= */
-function loginScreen(){
+function login(){
 app.innerHTML=`
 <div class="card">
-<h3>Login</h3>
-<input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Password">
-<button onclick="login()">Login</button>
-<button onclick="signupScreen()">Sign Up</button>
+<h3>${L[state.lang].login}</h3>
+<input id="email">
+<input id="pass" type="password">
+<button onclick="doLogin()">Login</button>
+<button onclick="signup()">Sign Up</button>
 </div>`;
 }
 
+function doLogin(){
+let u = state.db.citizens.find(x=>x.email===email.value && x.pass===pass.value);
+if(!u)return alert("Invalid");
+
+state.sessionId = u.email;
+state.db.logs.push("LOGIN: "+u.email);
+save();
+home();
+}
+
 /* ================= SIGNUP ================= */
-function signupScreen(){
+function signup(){
 app.innerHTML=`
 <div class="card">
-<h3>Sign Up</h3>
+<h3>${L[state.lang].signup}</h3>
 
 <input id="fn" placeholder="First Name">
 <input id="ln" placeholder="Last Name">
@@ -144,169 +167,134 @@ app.innerHTML=`
 <input id="addr" placeholder="Address">
 <input id="meter" placeholder="Meter Number">
 <input id="pass" type="password" placeholder="Password">
-<input id="cpass" type="password" placeholder="Confirm Password">
+<input id="cpass" type="password" placeholder="Confirm">
 
-<button onclick="signup()">Register</button>
+<button onclick="create()">Create</button>
 </div>`;
 }
 
-function signup(){
-if(pass.value!==cpass.value)return alert("Password mismatch");
+function create(){
+if(pass.value!==cpass.value)return alert("Mismatch");
 
-state.users.push({
+state.db.citizens.push({
+firstName:fn.value,
+lastName:ln.value,
+name:fn.value+" "+ln.value,
+phone:phone.value,
 email:email.value,
-pass:pass.value,
-name:fn.value+" "+ln.value
+address:addr.value,
+meter:meter.value,
+pass:pass.value
 });
 
-localStorage.setItem("users",JSON.stringify(state.users));
-alert("Account created");
-loginScreen();
-}
-
-/* ================= LOGIN ================= */
-function login(){
-let u=state.users.find(x=>x.email===email.value && x.pass===pass.value);
-if(!u)return alert("Invalid login");
-
-state.user=u;
-home();
+save();
+login();
 }
 
 /* ================= HOME ================= */
 function home(){
+let u = user();
+
 app.innerHTML=`
-<h2>${i18n[state.lang].welcome} ${state.user.name}</h2>
-
 <div class="card">
-<button onclick="outage()">Report Power Outage</button>
-<button onclick="support()">Technical Support</button>
-<button onclick="chat()">Speak to Representative</button>
-<button onclick="notifications()">Notifications</button>
-<button onclick="account()">My Account</button>
-<button onclick="agent()">Agent Panel</button>
-<button onclick="admin()">Admin Panel</button>
+<h3>${L[state.lang].welcome} ${u.name}</h3>
+
+<button onclick="chat()">Chat</button>
+<button onclick="outage()">Report Outage</button>
+<button onclick="profile()">Profile</button>
 </div>
 
 <div class="card">
-<h3>Live Map - Windhoek</h3>
+<h3>Operations - Windhoek</h3>
 <div id="map"></div>
-</div>
-
-<div class="card">
-<h3>Support Team</h3>
-<div id="profiles"></div>
 </div>
 `;
 
-initMap();
-profiles();
+map();
 }
 
 /* ================= MAP ================= */
-function initMap(){
-let map=L.map('map').setView([-22.56,17.08],13);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-L.marker([-22.56,17.08]).addTo(map).bindPopup("Operations Center").openPopup();
-}
+function map(){
+setTimeout(()=>{
+let m=L.map('map').setView([-22.56,17.08],13);
 
-/* ================= PROFILES ================= */
-function profiles(){
-let data=[
-{name:"Maria K.",role:"Support Lead"},
-{name:"David N.",role:"Technical Specialist"}
-];
-let div=document.getElementById("profiles");
-data.forEach(p=>{
-div.innerHTML+=`<div class="profile"><b>${p.name}</b><br>${p.role}</div>`;
-});
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
+.addTo(m);
+
+L.marker([-22.56,17.08])
+.addTo(m)
+.bindPopup("National Center - Windhoek");
+},200);
 }
 
 /* ================= CHAT ================= */
 function chat(){
 app.innerHTML=`
 <div class="card">
-<h3>Chat</h3>
+<h3>${L[state.lang].chat}</h3>
 <div id="chatBox"></div>
 <input id="msg">
-<button onclick="sendMsg()">Send</button>
-<button onclick="home()">Back</button>
+<button onclick="send()">Send</button>
+<button onclick="home()">${L[state.lang].back}</button>
 </div>`;
 }
 
-function sendMsg(){
-chatBox.innerHTML+=`<div><b>You:</b> ${msg.value}</div>`;
+function send(){
+let u=user();
+chatBox.innerHTML+=`<div><b>${u.name}:</b> ${msg.value}</div>`;
+
+let r="Request received.";
+if(msg.value.toLowerCase().includes("power")) r="Energy issue logged.";
+if(msg.value.toLowerCase().includes("bill")) r="Billing checked.";
+
 setTimeout(()=>{
-chatBox.innerHTML+=`<div><b>Agent:</b> Issue received and being processed.</div>`;
-},800);
+chatBox.innerHTML+=`<div><b>System:</b> ${r}</div>`;
+},600);
+
+state.db.logs.push(u.email+": "+msg.value);
+save();
+}
+
+/* ================= PROFILE ================= */
+function profile(){
+let u=user();
+
+app.innerHTML=`
+<div class="card">
+<h3>Profile</h3>
+
+<p>Name: ${u.name}</p>
+<p>Email: ${u.email}</p>
+<p>Phone: ${u.phone}</p>
+<p>Address: ${u.address}</p>
+<p>Meter: ${u.meter}</p>
+
+<button onclick="home()">Back</button>
+</div>`;
 }
 
 /* ================= OUTAGE ================= */
 function outage(){
-alert("Outage reported");
+state.db.events.push("OUTAGE");
+state.db.logs.push("OUTAGE REPORTED");
+save();
+alert("Reported");
 }
 
-/* ================= SUPPORT ================= */
-function support(){
-app.innerHTML=`<div class="card">
-<h3>Technical Support</h3>
-<ul>
-<li>FAQs</li>
-<li>Safety Tips</li>
-<li>Voltage Info</li>
-</ul>
-<button onclick="home()">Back</button>
-</div>`;
+/* ================= UI ================= */
+function toggleTheme(){
+state.theme=state.theme==="dark"?"light":"dark";
+document.body.className=state.theme==="dark"?"dark":"";
+save();
 }
 
-/* ================= NOTIFICATIONS ================= */
-function notifications(){
-app.innerHTML=`<div class="card"><h3>Notifications</h3>
-<p>No critical alerts</p>
-<button onclick="home()">Back</button>
-</div>`;
+function switchLang(){
+let arr=["en","af","osh"];
+let i=arr.indexOf(state.lang);
+state.lang=arr[(i+1)%3];
+save();
+home();
 }
-
-/* ================= ACCOUNT ================= */
-function account(){
-app.innerHTML=`<div class="card">
-<h3>My Account</h3>
-<input value="${state.user.name}">
-<button onclick="home()">Save</button>
-</div>`;
-}
-
-/* ================= AGENT ================= */
-function agent(){
-app.innerHTML=`<div class="card">
-<h3>Agent Dashboard</h3>
-<p>Queue: ${Math.floor(Math.random()*5)}</p>
-<p>Active Calls: ${Math.floor(Math.random()*3)}</p>
-<button onclick="home()">Back</button>
-</div>`;
-}
-
-/* ================= ADMIN ================= */
-function admin(){
-app.innerHTML=`<div class="card">
-<h3>Admin Panel</h3>
-<p>Total Users: ${state.users.length}</p>
-<button onclick="home()">Back</button>
-</div>`;
-}
-
-/* ================= BACKGROUND ================= */
-const imgs=[
-"https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
-"https://images.unsplash.com/photo-1494526585095-c41746248156"
-];
-
-setInterval(()=>{
-document.body.style.backgroundImage=`url(${imgs[Math.floor(Math.random()*imgs.length)]})`;
-},8000);
-
-/* INIT */
-splash();
 
 </script>
 
