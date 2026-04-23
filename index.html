@@ -8,33 +8,23 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 <style>
-:root{
---bg:#f4f6fb;
---card:#ffffff;
---text:#111827;
---primary:#1d4ed8;
-}
-
-body.dark{
---bg:#0b1220;
---card:#1e293b;
---text:#ffffff;
---primary:#38bdf8;
-}
-
 body{
 margin:0;
 font-family:Arial;
-background:var(--bg);
-color:var(--text);
 transition:.3s;
+background:#eef2f7;
+}
+
+body.dark{
+background:#0b1220;
+color:#fff;
 }
 
 header{
 display:flex;
 justify-content:space-between;
 align-items:center;
-padding:12px;
+padding:12px 16px;
 background:#0f172a;
 color:white;
 }
@@ -43,24 +33,29 @@ color:white;
 margin-left:6px;
 padding:6px 10px;
 border:none;
-cursor:pointer;
 border-radius:5px;
+cursor:pointer;
 }
 
-.container{padding:14px;}
+.container{padding:16px;}
 
 .card{
-background:var(--card);
+background:white;
 padding:14px;
 border-radius:12px;
 margin-bottom:12px;
-box-shadow:0 2px 10px rgba(0,0,0,.06);
+box-shadow:0 2px 10px rgba(0,0,0,0.06);
+}
+
+body.dark .card{
+background:#1e293b;
+color:white;
 }
 
 input,button{
-width:100%;
 padding:8px;
 margin:5px 0;
+width:100%;
 border-radius:6px;
 border:1px solid #ccc;
 }
@@ -70,17 +65,29 @@ height:220px;
 overflow:auto;
 border:1px solid #ddd;
 padding:8px;
-background:var(--card);
+background:#fff;
 }
 
-#map{height:260px;border-radius:12px;}
+body.dark #chatBox{
+background:#0f172a;
+}
+
+#map{
+height:260px;
+border-radius:12px;
+}
+
+.log{
+font-size:11px;
+opacity:.75;
+}
 </style>
 </head>
 
 <body>
 
 <header>
-<div><b>National Operations Platform</b></div>
+<div><b>National Digital Operations Platform</b></div>
 <div class="controls">
 <button onclick="toggleTheme()">🌙</button>
 <button onclick="switchLang()">🌍</button>
@@ -93,41 +100,69 @@ background:var(--card);
 
 <script>
 
-/* ================= GLOBAL STATE ================= */
+/* ================= STATE OF STATE ================= */
 let state = {
 lang: localStorage.getItem("lang") || "en",
 theme: localStorage.getItem("theme") || "light",
-sessionId: localStorage.getItem("sessionId") || null,
+session: JSON.parse(localStorage.getItem("session") || "null"),
 db: JSON.parse(localStorage.getItem("db") || JSON.stringify({
 citizens:[],
-logs:[],
-events:[]
-}))
+agents:[],
+tickets:[],
+events:[],
+logs:[]
+})),
+context:{}
+};
+
+/* ================= LANGUAGE SYSTEM ================= */
+const L = {
+en:{
+login:"Login",
+signup:"Citizen Registration",
+welcome:"Welcome Citizen",
+outage:"Report National Outage",
+support:"Technical Support",
+chat:"Speak to National Agent",
+account:"My Account",
+send:"Send",
+back:"Back"
+},
+af:{
+login:"Aanmeld",
+signup:"Registrasie",
+welcome:"Welkom Burger",
+outage:"Rapporteer fout",
+support:"Ondersteuning",
+chat:"Praat met agent",
+account:"Rekening",
+send:"Stuur",
+back:"Terug"
+},
+osh:{
+login:"Log in",
+signup:"Okwe sign up",
+welcome:"Wa uhala po",
+outage:"Power report",
+support:"Ombili",
+chat:"Ombi",
+account:"O account",
+send:"Tumina",
+back:"Shuna"
+}
 };
 
 function save(){
 localStorage.setItem("db",JSON.stringify(state.db));
-localStorage.setItem("sessionId",state.sessionId);
+localStorage.setItem("session",JSON.stringify(state.session));
 localStorage.setItem("lang",state.lang);
 localStorage.setItem("theme",state.theme);
-}
-
-/* ================= LANG ================= */
-const L={
-en:{login:"Login",signup:"Sign Up",welcome:"Welcome",chat:"Chat",back:"Back"},
-af:{login:"Aanmeld",signup:"Registreer",welcome:"Welkom",chat:"Gesels",back:"Terug"},
-osh:{login:"Log in",signup:"Sign up",welcome:"Wa uhala po",chat:"Ombi",back:"Shuna"}
-};
-
-/* ================= USER ================= */
-function user(){
-return state.db.citizens.find(u=>u.email===state.sessionId);
 }
 
 /* ================= INIT ================= */
 function init(){
 document.body.className = state.theme==="dark"?"dark":"";
-if(state.sessionId) home();
+if(state.session) home();
 else login();
 }
 init();
@@ -146,9 +181,9 @@ app.innerHTML=`
 
 function doLogin(){
 let u = state.db.citizens.find(x=>x.email===email.value && x.pass===pass.value);
-if(!u)return alert("Invalid");
+if(!u)return alert("Access denied");
 
-state.sessionId = u.email;
+state.session=u;
 state.db.logs.push("LOGIN: "+u.email);
 save();
 home();
@@ -165,129 +200,159 @@ app.innerHTML=`
 <input id="phone" placeholder="Phone">
 <input id="email" placeholder="Email">
 <input id="addr" placeholder="Address">
-<input id="meter" placeholder="Meter Number">
+<input id="meter" placeholder="Electricity Meter">
 <input id="pass" type="password" placeholder="Password">
 <input id="cpass" type="password" placeholder="Confirm">
 
-<button onclick="create()">Create</button>
+<button onclick="createCitizen()">Register</button>
 </div>`;
 }
 
-function create(){
-if(pass.value!==cpass.value)return alert("Mismatch");
+function createCitizen(){
+if(pass.value!==cpass.value)return alert("Password mismatch");
 
 state.db.citizens.push({
-firstName:fn.value,
-lastName:ln.value,
 name:fn.value+" "+ln.value,
-phone:phone.value,
 email:email.value,
-address:addr.value,
-meter:meter.value,
-pass:pass.value
+pass:pass.value,
+meter:meter.value
 });
 
+state.db.logs.push("NEW CITIZEN REGISTERED");
 save();
 login();
 }
 
-/* ================= HOME ================= */
+/* ================= HOME (STATE DASHBOARD) ================= */
 function home(){
-let u = user();
-
 app.innerHTML=`
 <div class="card">
-<h3>${L[state.lang].welcome} ${u.name}</h3>
+<h3>${L[state.lang].welcome} ${state.session.name}</h3>
 
-<button onclick="chat()">Chat</button>
-<button onclick="outage()">Report Outage</button>
-<button onclick="profile()">Profile</button>
+<button onclick="outage()">${L[state.lang].outage}</button>
+<button onclick="support()">${L[state.lang].support}</button>
+<button onclick="chat()">${L[state.lang].chat}</button>
+<button onclick="account()">${L[state.lang].account}</button>
 </div>
 
 <div class="card">
-<h3>Operations - Windhoek</h3>
+<h3>National Operations - Windhoek</h3>
 <div id="map"></div>
+</div>
+
+<div class="card">
+<h4>State Audit Logs</h4>
+<div class="log">
+${state.db.logs.slice(-6).join("<br>")}
+</div>
 </div>
 `;
 
-map();
+mapInit();
 }
 
 /* ================= MAP ================= */
-function map(){
+function mapInit(){
 setTimeout(()=>{
-let m=L.map('map').setView([-22.56,17.08],13);
+let map = L.map('map').setView([-22.56,17.08],13);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
-.addTo(m);
+.addTo(map);
 
 L.marker([-22.56,17.08])
-.addTo(m)
-.bindPopup("National Center - Windhoek");
+.addTo(map)
+.bindPopup("National Operations Center - Windhoek");
+
 },200);
 }
 
-/* ================= CHAT ================= */
+/* ================= CHAT (STATE AI SIMULATION) ================= */
 function chat(){
 app.innerHTML=`
 <div class="card">
 <h3>${L[state.lang].chat}</h3>
 <div id="chatBox"></div>
 <input id="msg">
-<button onclick="send()">Send</button>
+<button onclick="send()">${L[state.lang].send}</button>
 <button onclick="home()">${L[state.lang].back}</button>
 </div>`;
 }
 
 function send(){
-let u=user();
-chatBox.innerHTML+=`<div><b>${u.name}:</b> ${msg.value}</div>`;
+let text = msg.value;
 
-let r="Request received.";
-if(msg.value.toLowerCase().includes("power")) r="Energy issue logged.";
-if(msg.value.toLowerCase().includes("bill")) r="Billing checked.";
+chatBox.innerHTML += `<div><b>Citizen:</b> ${text}</div>`;
+
+state.db.logs.push("CHAT: "+text);
 
 setTimeout(()=>{
-chatBox.innerHTML+=`<div><b>System:</b> ${r}</div>`;
-},600);
+chatBox.innerHTML += `<div><b>National System:</b> ${process(text)}</div>`;
+},700);
 
-state.db.logs.push(u.email+": "+msg.value);
 save();
 }
 
-/* ================= PROFILE ================= */
-function profile(){
-let u=user();
+function process(t){
+t=t.toLowerCase();
 
+if(t.includes("bill")){
+state.context="billing";
+return "Billing department confirms account is stable.";
+}
+
+if(t.includes("power")){
+state.db.events.push("POWER EVENT");
+return "Energy grid anomaly detected. Engineers dispatched.";
+}
+
+if(t.includes("password")){
+state.context="security";
+return "Security reset protocol available.";
+}
+
+return "Request registered in national system.";
+}
+
+/* ================= SYSTEM ACTIONS ================= */
+function outage(){
+state.db.events.push("NATIONAL OUTAGE REPORT");
+state.db.logs.push("OUTAGE EVENT");
+save();
+alert("National outage registered");
+}
+
+/* ================= SUPPORT ================= */
+function support(){
 app.innerHTML=`
 <div class="card">
-<h3>Profile</h3>
-
-<p>Name: ${u.name}</p>
-<p>Email: ${u.email}</p>
-<p>Phone: ${u.phone}</p>
-<p>Address: ${u.address}</p>
-<p>Meter: ${u.meter}</p>
-
+<h3>Technical Support</h3>
+<ul>
+<li>Troubleshooting</li>
+<li>Safety Protocols</li>
+<li>Voltage Monitoring</li>
+</ul>
 <button onclick="home()">Back</button>
 </div>`;
 }
 
-/* ================= OUTAGE ================= */
-function outage(){
-state.db.events.push("OUTAGE");
-state.db.logs.push("OUTAGE REPORTED");
-save();
-alert("Reported");
+/* ================= ACCOUNT ================= */
+function account(){
+app.innerHTML=`
+<div class="card">
+<h3>Citizen Account</h3>
+<input value="${state.session.name}">
+<button onclick="home()">Save</button>
+</div>`;
 }
 
-/* ================= UI ================= */
+/* ================= THEME ================= */
 function toggleTheme(){
-state.theme=state.theme==="dark"?"light":"dark";
+state.theme = state.theme==="dark"?"light":"dark";
 document.body.className=state.theme==="dark"?"dark":"";
 save();
 }
 
+/* ================= LANGUAGE ================= */
 function switchLang(){
 let arr=["en","af","osh"];
 let i=arr.indexOf(state.lang);
@@ -299,4 +364,4 @@ home();
 </script>
 
 </body>
-  </html>
+</html>
