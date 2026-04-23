@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>National Digital Operations Platform</title>
+<title>National Operations System</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
@@ -12,52 +12,50 @@ body{
 margin:0;
 font-family:Arial;
 transition:.3s;
-background:#eef2f7;
+background:#f4f6fb;
 }
 
 body.dark{
-background:#0b1220;
+background:#0f172a;
 color:#fff;
 }
 
 header{
 display:flex;
 justify-content:space-between;
+padding:12px;
+background:#111827;
+color:#fff;
 align-items:center;
-padding:12px 16px;
-background:#0f172a;
-color:white;
 }
 
 .controls button{
 margin-left:6px;
 padding:6px 10px;
 border:none;
-border-radius:5px;
 cursor:pointer;
+border-radius:4px;
 }
 
-.container{padding:16px;}
+.container{padding:15px;}
 
 .card{
-background:white;
-padding:14px;
-border-radius:12px;
+background:#fff;
+padding:12px;
+border-radius:10px;
 margin-bottom:12px;
-box-shadow:0 2px 10px rgba(0,0,0,0.06);
+box-shadow:0 2px 8px rgba(0,0,0,0.05);
 }
 
 body.dark .card{
 background:#1e293b;
-color:white;
+color:#fff;
 }
 
 input,button{
-padding:8px;
-margin:5px 0;
 width:100%;
-border-radius:6px;
-border:1px solid #ccc;
+padding:8px;
+margin:4px 0;
 }
 
 #chatBox{
@@ -65,21 +63,16 @@ height:220px;
 overflow:auto;
 border:1px solid #ddd;
 padding:8px;
-background:#fff;
-}
-
-body.dark #chatBox{
-background:#0f172a;
 }
 
 #map{
 height:260px;
-border-radius:12px;
+border-radius:10px;
 }
 
 .log{
 font-size:11px;
-opacity:.75;
+opacity:.7;
 }
 </style>
 </head>
@@ -87,7 +80,7 @@ opacity:.75;
 <body>
 
 <header>
-<div><b>National Digital Operations Platform</b></div>
+<div id="title">National Operations Center</div>
 <div class="controls">
 <button onclick="toggleTheme()">🌙</button>
 <button onclick="switchLang()">🌍</button>
@@ -100,58 +93,40 @@ opacity:.75;
 
 <script>
 
-/* ================= STATE OF STATE ================= */
+/* ================= CORE STATE ================= */
 let state = {
 lang: localStorage.getItem("lang") || "en",
 theme: localStorage.getItem("theme") || "light",
 session: JSON.parse(localStorage.getItem("session") || "null"),
 db: JSON.parse(localStorage.getItem("db") || JSON.stringify({
-citizens:[],
-agents:[],
+users:[],
 tickets:[],
-events:[],
+notifications:[],
 logs:[]
 })),
-context:{}
+context:{chatTopic:null}
 };
 
-/* ================= LANGUAGE SYSTEM ================= */
+/* ================= LANGUAGE ================= */
 const L = {
 en:{
-login:"Login",
-signup:"Citizen Registration",
-welcome:"Welcome Citizen",
-outage:"Report National Outage",
-support:"Technical Support",
-chat:"Speak to National Agent",
-account:"My Account",
-send:"Send",
-back:"Back"
+login:"Login", signup:"Sign Up", welcome:"Welcome",
+chat:"Chat", support:"Support", outage:"Report Outage",
+account:"Account", send:"Send", back:"Back"
 },
 af:{
-login:"Aanmeld",
-signup:"Registrasie",
-welcome:"Welkom Burger",
-outage:"Rapporteer fout",
-support:"Ondersteuning",
-chat:"Praat met agent",
-account:"Rekening",
-send:"Stuur",
-back:"Terug"
+login:"Aanmeld", signup:"Registreer", welcome:"Welkom",
+chat:"Gesels", support:"Ondersteuning", outage:"Rapporteer",
+account:"Rekening", send:"Stuur", back:"Terug"
 },
 osh:{
-login:"Log in",
-signup:"Okwe sign up",
-welcome:"Wa uhala po",
-outage:"Power report",
-support:"Ombili",
-chat:"Ombi",
-account:"O account",
-send:"Tumina",
-back:"Shuna"
+login:"Log in", signup:"U sign up", welcome:"Wa uhala po",
+chat:"Ombi", support:"Ombili", outage:"Power outage",
+account:"O account", send:"Tumina", back:"Shuna"
 }
 };
 
+/* ================= SAVE ================= */
 function save(){
 localStorage.setItem("db",JSON.stringify(state.db));
 localStorage.setItem("session",JSON.stringify(state.session));
@@ -161,7 +136,7 @@ localStorage.setItem("theme",state.theme);
 
 /* ================= INIT ================= */
 function init(){
-document.body.className = state.theme==="dark"?"dark":"";
+document.body.className = state.theme;
 if(state.session) home();
 else login();
 }
@@ -180,11 +155,11 @@ app.innerHTML=`
 }
 
 function doLogin(){
-let u = state.db.citizens.find(x=>x.email===email.value && x.pass===pass.value);
-if(!u)return alert("Access denied");
+let u = state.db.users.find(x=>x.email===email.value && x.pass===pass.value);
+if(!u)return alert("Invalid");
 
 state.session=u;
-state.db.logs.push("LOGIN: "+u.email);
+state.db.logs.push("Login: "+u.email);
 save();
 home();
 }
@@ -194,36 +169,24 @@ function signup(){
 app.innerHTML=`
 <div class="card">
 <h3>${L[state.lang].signup}</h3>
-
-<input id="fn" placeholder="First Name">
-<input id="ln" placeholder="Last Name">
-<input id="phone" placeholder="Phone">
-<input id="email" placeholder="Email">
-<input id="addr" placeholder="Address">
-<input id="meter" placeholder="Electricity Meter">
-<input id="pass" type="password" placeholder="Password">
-<input id="cpass" type="password" placeholder="Confirm">
-
-<button onclick="createCitizen()">Register</button>
+<input id="name">
+<input id="email">
+<input id="pass" type="password">
+<button onclick="create()">Create</button>
 </div>`;
 }
 
-function createCitizen(){
-if(pass.value!==cpass.value)return alert("Password mismatch");
-
-state.db.citizens.push({
-name:fn.value+" "+ln.value,
+function create(){
+state.db.users.push({
+name:name.value,
 email:email.value,
-pass:pass.value,
-meter:meter.value
+pass:pass.value
 });
-
-state.db.logs.push("NEW CITIZEN REGISTERED");
 save();
 login();
 }
 
-/* ================= HOME (STATE DASHBOARD) ================= */
+/* ================= HOME ================= */
 function home(){
 app.innerHTML=`
 <div class="card">
@@ -236,24 +199,23 @@ app.innerHTML=`
 </div>
 
 <div class="card">
-<h3>National Operations - Windhoek</h3>
+<h3>Operations Map - Windhoek</h3>
 <div id="map"></div>
 </div>
 
 <div class="card">
-<h4>State Audit Logs</h4>
+<h4>System Logs</h4>
 <div class="log">
-${state.db.logs.slice(-6).join("<br>")}
+${state.db.logs.slice(-5).join("<br>")}
 </div>
 </div>
 `;
 
-mapInit();
+setTimeout(mapInit,200);
 }
 
 /* ================= MAP ================= */
 function mapInit(){
-setTimeout(()=>{
 let map = L.map('map').setView([-22.56,17.08],13);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
@@ -261,13 +223,13 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
 
 L.marker([-22.56,17.08])
 .addTo(map)
-.bindPopup("National Operations Center - Windhoek");
-
-},200);
+.bindPopup("National Operations Center");
 }
 
-/* ================= CHAT (STATE AI SIMULATION) ================= */
+/* ================= CHAT ================= */
 function chat(){
+state.context.chatTopic=null;
+
 app.innerHTML=`
 <div class="card">
 <h3>${L[state.lang].chat}</h3>
@@ -280,79 +242,62 @@ app.innerHTML=`
 
 function send(){
 let text = msg.value;
+chatBox.innerHTML += `<div><b>You:</b> ${text}</div>`;
 
-chatBox.innerHTML += `<div><b>Citizen:</b> ${text}</div>`;
-
-state.db.logs.push("CHAT: "+text);
+state.context.chatTopic = detect(text);
 
 setTimeout(()=>{
-chatBox.innerHTML += `<div><b>National System:</b> ${process(text)}</div>`;
+chatBox.innerHTML += `<div><b>System:</b> ${reply(text)}</div>`;
 },700);
-
-save();
 }
 
-function process(t){
-t=t.toLowerCase();
-
-if(t.includes("bill")){
-state.context="billing";
-return "Billing department confirms account is stable.";
+function detect(t){
+if(t.includes("bill")) return "billing";
+if(t.includes("password")) return "security";
+if(t.includes("delay")) return "network";
+return "general";
 }
 
-if(t.includes("power")){
-state.db.events.push("POWER EVENT");
-return "Energy grid anomaly detected. Engineers dispatched.";
+function reply(t){
+switch(state.context.chatTopic){
+case "billing": return "Billing checked and validated.";
+case "security": return "Security reset available.";
+case "network": return "Network issue detected.";
+default: return "Request logged in system.";
 }
-
-if(t.includes("password")){
-state.context="security";
-return "Security reset protocol available.";
-}
-
-return "Request registered in national system.";
 }
 
 /* ================= SYSTEM ACTIONS ================= */
 function outage(){
-state.db.events.push("NATIONAL OUTAGE REPORT");
-state.db.logs.push("OUTAGE EVENT");
+state.db.notifications.push("Outage reported");
+state.db.logs.push("Outage event triggered");
 save();
-alert("National outage registered");
+alert("Reported");
 }
 
-/* ================= SUPPORT ================= */
 function support(){
-app.innerHTML=`
-<div class="card">
-<h3>Technical Support</h3>
-<ul>
-<li>Troubleshooting</li>
-<li>Safety Protocols</li>
-<li>Voltage Monitoring</li>
-</ul>
+app.innerHTML=`<div class="card">
+<h3>Support</h3>
+<p>FAQs / Safety / Voltage</p>
 <button onclick="home()">Back</button>
 </div>`;
 }
 
-/* ================= ACCOUNT ================= */
 function account(){
-app.innerHTML=`
-<div class="card">
-<h3>Citizen Account</h3>
+app.innerHTML=`<div class="card">
+<h3>Account</h3>
 <input value="${state.session.name}">
 <button onclick="home()">Save</button>
 </div>`;
 }
 
-/* ================= THEME ================= */
+/* ================= UI CONTROLS ================= */
 function toggleTheme(){
 state.theme = state.theme==="dark"?"light":"dark";
-document.body.className=state.theme==="dark"?"dark":"";
+document.body.className=state.theme;
 save();
 }
 
-/* ================= LANGUAGE ================= */
 function switchLang(){
 let arr=["en","af","osh"];
 let i=arr.indexOf(state.lang);
@@ -364,4 +309,4 @@ home();
 </script>
 
 </body>
-</html>
+  </html>
