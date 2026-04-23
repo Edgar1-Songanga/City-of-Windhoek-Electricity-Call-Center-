@@ -9,18 +9,16 @@
 
 <style>
 
-/* ===== PREMIUM EXTREME SYSTEM ===== */
+/* ===== 2026 ULTRA PREMIUM UI ===== */
 
 :root{
 --bg:#09090b;
 --text:#fafafa;
---muted:rgba(255,255,255,0.6);
+--muted:rgba(255,255,255,0.65);
 --border:rgba(255,255,255,0.08);
 --primary:#8b5cf6;
 --gradient:linear-gradient(135deg,#8b5cf6,#6366f1,#22d3ee);
 }
-
-*{box-sizing:border-box;}
 
 body{
 margin:0;
@@ -30,125 +28,73 @@ radial-gradient(circle at 20% 0%, rgba(139,92,246,0.15), transparent 40%),
 radial-gradient(circle at 80% 100%, rgba(34,211,238,0.1), transparent 40%),
 var(--bg);
 color:var(--text);
-line-height:1.6;
-letter-spacing:-0.02em;
 }
 
-/* HEADER */
 header{
 display:flex;
 justify-content:space-between;
-align-items:center;
-padding:20px 28px;
-background:rgba(9,9,11,0.65);
+padding:20px;
 backdrop-filter:blur(20px);
 border-bottom:1px solid var(--border);
-position:sticky;
-top:0;
-z-index:10;
+position:sticky;top:0;
 }
 
-/* BUTTONS */
 .controls button{
-background:rgba(255,255,255,0.05);
-border:1px solid var(--border);
-border-radius:12px;
+margin-left:6px;
 padding:8px 12px;
-color:#fff;
+border-radius:10px;
+border:1px solid var(--border);
+background:rgba(255,255,255,0.05);
+color:white;
 cursor:pointer;
-transition:.2s;
 }
 
-.controls button:hover{
-background:rgba(139,92,246,0.2);
-}
+.container{padding:30px;max-width:1100px;margin:auto;}
 
-/* LAYOUT */
-.container{
-padding:30px;
-max-width:1100px;
-margin:auto;
-}
-
-/* CARD */
 .card{
-background:linear-gradient(145deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02));
+background:rgba(255,255,255,0.03);
 border:1px solid var(--border);
 border-radius:18px;
-padding:26px;
-margin-bottom:20px;
-backdrop-filter:blur(18px);
-box-shadow:0 10px 40px rgba(0,0,0,0.4);
-transition:.25s;
+padding:22px;
+margin-bottom:18px;
+backdrop-filter:blur(16px);
 }
 
-.card:hover{
-transform:translateY(-5px);
-border-color:rgba(139,92,246,0.5);
-}
-
-/* INPUT */
-input{
-width:100%;
-padding:14px;
-margin:8px 0;
-border-radius:12px;
-border:1px solid var(--border);
-background:rgba(255,255,255,0.03);
-color:#fff;
-}
-
-input:focus{
-outline:none;
-border-color:var(--primary);
-box-shadow:0 0 0 2px rgba(139,92,246,0.3);
-}
-
-/* BUTTON */
 button{
 width:100%;
-padding:14px;
-margin:8px 0;
-border:none;
-border-radius:12px;
-font-weight:600;
-background:var(--gradient);
-color:#fff;
-cursor:pointer;
-transition:.2s;
-}
-
-button:hover{
-transform:translateY(-2px);
-box-shadow:0 8px 30px rgba(139,92,246,0.4);
-}
-
-/* CHAT */
-#chatBox{
-height:260px;
-overflow:auto;
 padding:12px;
-border-radius:14px;
+margin:6px 0;
+border:none;
+border-radius:10px;
+background:var(--gradient);
+color:white;
+cursor:pointer;
+}
+
+input{
+width:100%;
+padding:12px;
+margin:6px 0;
+border-radius:10px;
 border:1px solid var(--border);
-background:rgba(255,255,255,0.02);
+background:rgba(255,255,255,0.05);
+color:white;
 }
 
-/* MAP */
-#map{
-height:300px;
-border-radius:18px;
-border:1px solid var(--border);
+#map{height:260px;border-radius:16px;}
+
+.profile{
+display:flex;
+gap:15px;
+align-items:center;
 }
 
-/* TEXT */
-h3{
-margin-bottom:10px;
-background:linear-gradient(90deg,#fff,#c7d2fe);
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
+.avatar{
+width:60px;height:60px;border-radius:50%;
+background:linear-gradient(135deg,#6366f1,#22d3ee);
+display:flex;align-items:center;justify-content:center;
+font-weight:bold;
 }
-
-p{color:var(--muted);}
 
 </style>
 </head>
@@ -156,7 +102,7 @@ p{color:var(--muted);}
 <body>
 
 <header>
-<div><b>National Operations Platform</b></div>
+<div><b>National Operations Platform</b><br><small>Magestade Pura Digital</small></div>
 <div class="controls">
 <button onclick="toggleTheme()">🌙</button>
 <button onclick="switchLang()">🌍</button>
@@ -169,51 +115,43 @@ p{color:var(--muted);}
 
 <script>
 
-/* ===== GLOBAL STATE ===== */
+/* ===== STATE ===== */
 
-let state = {
-lang: localStorage.getItem("lang") || "en",
-theme: localStorage.getItem("theme") || "dark",
-sessionId: localStorage.getItem("sessionId") || null,
-db: JSON.parse(localStorage.getItem("db") || JSON.stringify({
-citizens:[],
+let state={
+lang:localStorage.getItem("lang")||"en",
+theme:localStorage.getItem("theme")||"dark",
+session:localStorage.getItem("session")||null,
+db:JSON.parse(localStorage.getItem("db")||JSON.stringify({
+users:[],
 tickets:[],
-logs:[],
-notifications:[]
+calls:[],
+notifications:[],
+agents:[
+{id:"AG001",name:"Agent One",active:true},
+{id:"AG002",name:"Agent Two",active:true}
+]
 }))
 };
 
 function save(){
 localStorage.setItem("db",JSON.stringify(state.db));
-localStorage.setItem("sessionId",state.sessionId);
-localStorage.setItem("lang",state.lang);
-localStorage.setItem("theme",state.theme);
+localStorage.setItem("session",state.session);
 }
 
 /* ===== LANG ===== */
 
 const L={
-en:{login:"Login",signup:"Sign Up",welcome:"Welcome",chat:"Chat",back:"Back"},
-af:{login:"Aanmeld",signup:"Registreer",welcome:"Welkom",chat:"Gesels",back:"Terug"},
-osh:{login:"Log in",signup:"Sign up",welcome:"Wa uhala po",chat:"Ombi",back:"Shuna"}
+en:{login:"Login",signup:"Sign Up",customer:"Customer",agent:"Agent",admin:"Admin"},
+af:{login:"Aanmeld",signup:"Registreer",customer:"Kliënt",agent:"Agent",admin:"Admin"},
+osh:{login:"Log in",signup:"Sign up",customer:"Omuntu",agent:"Agent",admin:"Admin"}
 };
 
-function t(key){
-return L[state.lang][key] || key;
-}
-
-/* ===== USER ===== */
-
-function user(){
-return state.db.citizens.find(u=>u.email===state.sessionId);
-}
+function t(k){return L[state.lang][k]||k}
 
 /* ===== INIT ===== */
 
 function init(){
-document.body.className = state.theme==="dark"?"dark":"";
-state.db.notifications.push("System active");
-if(state.sessionId) home();
+if(state.session) route();
 else login();
 }
 init();
@@ -224,21 +162,21 @@ function login(){
 app.innerHTML=`
 <div class="card">
 <h3>${t("login")}</h3>
-<input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Password">
+<input id="email">
+<input id="pass" type="password">
 <button onclick="doLogin()">Login</button>
 <button onclick="signup()">Sign Up</button>
+<button onclick="agentLogin()">Agent</button>
+<button onclick="admin()">Admin</button>
 </div>`;
 }
 
 function doLogin(){
-let u = state.db.citizens.find(x=>x.email===email.value && x.pass===pass.value);
-if(!u)return alert("Invalid credentials");
-
-state.sessionId = u.email;
-state.db.logs.push("LOGIN "+u.email);
+let u=state.db.users.find(x=>x.email===email.value&&x.pass===pass.value);
+if(!u)return alert("Invalid");
+state.session=u.email;
 save();
-home();
+route();
 }
 
 /* ===== SIGNUP ===== */
@@ -247,55 +185,60 @@ function signup(){
 app.innerHTML=`
 <div class="card">
 <h3>${t("signup")}</h3>
-
-<input id="fn" placeholder="First Name">
-<input id="ln" placeholder="Last Name">
-<input id="phone" placeholder="Phone">
-<input id="email" placeholder="Email">
-<input id="addr" placeholder="Address">
-<input id="meter" placeholder="Meter Number">
-<input id="pass" type="password" placeholder="Password">
-<input id="cpass" type="password" placeholder="Confirm Password">
-
-<button onclick="create()">Create Account</button>
+<input id="fn"><input id="ln"><input id="phone">
+<input id="email"><input id="addr"><input id="meter">
+<input id="pass" type="password"><input id="cpass" type="password">
+<button onclick="create()">Create</button>
 </div>`;
 }
 
 function create(){
-if(pass.value!==cpass.value)return alert("Passwords mismatch");
+if(pass.value!==cpass.value)return alert("Mismatch");
 
-state.db.citizens.push({
+state.db.users.push({
 name:fn.value+" "+ln.value,
-phone:phone.value,
 email:email.value,
+phone:phone.value,
 address:addr.value,
 meter:meter.value,
 pass:pass.value,
 created:new Date().toISOString()
 });
 
-state.db.logs.push("REGISTER "+email.value);
 save();
 login();
 }
 
-/* ===== HOME ===== */
+/* ===== ROUTING ===== */
+
+function route(){
+let u=state.db.users.find(x=>x.email===state.session);
+if(u) return home();
+login();
+}
+
+/* ===== CUSTOMER HOME ===== */
 
 function home(){
-let u=user();
+let u=state.db.users.find(x=>x.email===state.session);
 
 app.innerHTML=`
+<div class="card profile">
+<div class="avatar">${u.name[0]}</div>
+<div>
+<b>${u.name}</b><br>
+<small>${u.email}</small>
+</div>
+</div>
+
 <div class="card">
-<h3>${t("welcome")} ${u.name}</h3>
-<button onclick="chat()">Chat Support</button>
-<button onclick="createTicket()">Report Issue</button>
-<button onclick="profile()">My Profile</button>
-<button onclick="notifications()">Notifications</button>
+<button onclick="chat()">Chat</button>
+<button onclick="report()">Report Outage</button>
+<button onclick="profile()">Profile</button>
 <button onclick="logout()">Logout</button>
 </div>
 
 <div class="card">
-<h3>Operations - Windhoek</h3>
 <div id="map"></div>
 </div>
 `;
@@ -307,68 +250,102 @@ map();
 
 function map(){
 setTimeout(()=>{
-let m=L.map('map').setView([-22.56,17.08],13);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m);
-L.marker([-22.56,17.08]).addTo(m).bindPopup("Control Center");
+let m=L.map("map").setView([-22.56,17.08],13);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(m);
 },200);
 }
 
 /* ===== CHAT ===== */
 
+let memory=[];
+
 function chat(){
 app.innerHTML=`
 <div class="card">
-<h3>${t("chat")}</h3>
 <div id="chatBox"></div>
 <input id="msg">
 <button onclick="send()">Send</button>
-<button onclick="home()">${t("back")}</button>
+<button onclick="home()">Back</button>
 </div>`;
 }
 
 function send(){
-let u=user();
-let text = msg.value;
+let u=state.db.users.find(x=>x.email===state.session);
+memory.push(msg.value);
 
-chatBox.innerHTML+=`<div><b>${u.name}:</b> ${text}</div>`;
+chatBox.innerHTML+=`<div><b>${u.name}:</b> ${msg.value}</div>`;
 
-let response="Request logged.";
-if(text.toLowerCase().includes("power")) response="Power issue registered.";
-if(text.toLowerCase().includes("bill")) response="Billing review started.";
+let reply="Request received.";
+
+if(memory.join(" ").includes("power")) reply="Power issue escalated.";
+if(memory.join(" ").includes("bill")) reply="Billing under review.";
 
 setTimeout(()=>{
-chatBox.innerHTML+=`<div><b>System:</b> ${response}</div>`;
-},600);
+chatBox.innerHTML+=`<div><b>System:</b> ${reply}</div>`;
+},500);
 
-state.db.logs.push("CHAT "+u.email+" "+text);
-save();
 }
 
-/* ===== TICKETS ===== */
+/* ===== CALL CENTER SIM ===== */
 
-function createTicket(){
-let u=user();
-state.db.tickets.push({
+function report(){
+state.db.calls.push({
 id:Date.now(),
-user:u.email,
-status:"open",
-date:new Date().toISOString()
+status:"waiting"
 });
+alert("Call queued");
+}
 
-state.db.notifications.push("Ticket created");
+/* ===== AGENT ===== */
+
+function agentLogin(){
+app.innerHTML=`
+<div class="card">
+<h3>Agent</h3>
+<button onclick="agent()">Enter Dashboard</button>
+</div>`;
+}
+
+function agent(){
+let queue=state.db.calls.filter(c=>c.status==="waiting");
+
+app.innerHTML=`
+<div class="card">
+<h3>Queue: ${queue.length}</h3>
+<button onclick="take()">Take Call</button>
+<button onclick="login()">Back</button>
+</div>`;
+}
+
+function take(){
+let c=state.db.calls.find(x=>x.status==="waiting");
+if(!c)return alert("No calls");
+c.status="active";
+alert("Call started");
 save();
-alert("Ticket submitted");
+agent();
+}
+
+/* ===== ADMIN ===== */
+
+function admin(){
+app.innerHTML=`
+<div class="card">
+<h3>Admin Panel</h3>
+<p>Users: ${state.db.users.length}</p>
+<p>Calls: ${state.db.calls.length}</p>
+<button onclick="login()">Back</button>
+</div>`;
 }
 
 /* ===== PROFILE ===== */
 
 function profile(){
-let u=user();
+let u=state.db.users.find(x=>x.email===state.session);
 
 app.innerHTML=`
 <div class="card">
-<h3>Profile</h3>
-<p>${u.name}</p>
+<h3>${u.name}</h3>
 <p>${u.email}</p>
 <p>${u.phone}</p>
 <p>${u.address}</p>
@@ -377,31 +354,16 @@ app.innerHTML=`
 </div>`;
 }
 
-/* ===== NOTIFICATIONS ===== */
-
-function notifications(){
-let list = state.db.notifications.map(n=>`<p>${n}</p>`).join("");
-
-app.innerHTML=`
-<div class="card">
-<h3>Notifications</h3>
-${list}
-<button onclick="home()">Back</button>
-</div>`;
-}
-
 /* ===== SYSTEM ===== */
 
 function logout(){
-state.sessionId=null;
+state.session=null;
 save();
 login();
 }
 
 function toggleTheme(){
-state.theme=state.theme==="dark"?"light":"dark";
-document.body.className=state.theme==="dark"?"dark":"";
-save();
+document.body.style.background="#fff";
 }
 
 function switchLang(){
@@ -409,10 +371,10 @@ let arr=["en","af","osh"];
 let i=arr.indexOf(state.lang);
 state.lang=arr[(i+1)%3];
 save();
-home();
+route();
 }
 
 </script>
 
 </body>
-  </html>
+</html>
