@@ -8,174 +8,72 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 <style>
-
-/* ================= MODERN SAAS RESKIN ================= */
-
 :root{
---bg:#09090b;
---card:rgba(255,255,255,0.04);
---text:#fafafa;
---muted:rgba(255,255,255,0.6);
---border:rgba(255,255,255,0.1);
---primary:#8b5cf6;
---primary-glow:rgba(139,92,246,0.4);
+--bg:#f4f6fb;
+--card:#ffffff;
+--text:#111827;
+--primary:#1d4ed8;
 }
 
 body.dark{
---bg:#09090b;
---card:rgba(255,255,255,0.04);
---text:#fafafa;
+--bg:#0b1220;
+--card:#1e293b;
+--text:#ffffff;
+--primary:#38bdf8;
 }
 
 body{
 margin:0;
-font-family:system-ui,-apple-system,Inter,sans-serif;
-background:radial-gradient(circle at 20% 0%, #111113 0%, #09090b 60%);
+font-family:Arial;
+background:var(--bg);
 color:var(--text);
-line-height:1.6;
-letter-spacing:-0.02em;
-transition:all 0.2s ease;
+transition:.3s;
 }
 
-/* HEADER */
 header{
 display:flex;
 justify-content:space-between;
 align-items:center;
-background:rgba(9,9,11,0.7);
-backdrop-filter:blur(20px);
-border-bottom:1px solid var(--border);
-padding:20px 28px;
+padding:12px;
+background:#0f172a;
 color:white;
 }
 
-/* CONTROLS */
 .controls button{
-background:rgba(255,255,255,0.05);
-color:#fafafa;
-border:1px solid var(--border);
-border-radius:12px;
-padding:8px 14px;
+margin-left:6px;
+padding:6px 10px;
+border:none;
 cursor:pointer;
-transition:all 0.2s ease;
+border-radius:5px;
 }
 
-.controls button:hover{
-background:rgba(139,92,246,0.2);
-border-color:var(--primary);
-}
+.container{padding:14px;}
 
-/* CONTAINER */
-.container{
-padding:28px;
-max-width:1200px;
-margin:auto;
-}
-
-/* CARD */
 .card{
 background:var(--card);
-backdrop-filter:blur(20px);
-border-radius:16px;
-padding:24px;
-border:1px solid var(--border);
-box-shadow:0 8px 30px rgba(0,0,0,0.25);
-transition:all 0.2s ease;
-margin-bottom:18px;
-}
-
-.card:hover{
-transform:translateY(-4px);
-border-color:var(--primary);
-box-shadow:0 12px 40px rgba(0,0,0,0.35);
-}
-
-/* INPUTS */
-input{
-width:100%;
-padding:12px;
-margin:8px 0;
+padding:14px;
 border-radius:12px;
-border:1px solid var(--border);
-background:rgba(255,255,255,0.02);
-color:var(--text);
-transition:all 0.2s ease;
+margin-bottom:12px;
+box-shadow:0 2px 10px rgba(0,0,0,.06);
 }
 
-input:focus{
-outline:none;
-border-color:var(--primary);
-box-shadow:0 0 0 2px var(--primary-glow);
-}
-
-/* BUTTONS */
-button{
+input,button{
 width:100%;
-padding:12px;
-margin:8px 0;
-border-radius:12px;
-border:none;
-font-weight:600;
-background:linear-gradient(135deg,#8b5cf6,#6d28d9);
-color:white;
-cursor:pointer;
-transition:all 0.2s ease;
+padding:8px;
+margin:5px 0;
+border-radius:6px;
+border:1px solid #ccc;
 }
 
-button:hover{
-transform:translateY(-2px);
-box-shadow:0 6px 20px var(--primary-glow);
-}
-
-button:active{
-transform:scale(0.98);
-}
-
-/* CHAT */
 #chatBox{
-height:260px;
+height:220px;
 overflow:auto;
-border-radius:16px;
-border:1px solid var(--border);
-padding:12px;
-background:rgba(255,255,255,0.02);
-backdrop-filter:blur(20px);
+border:1px solid #ddd;
+padding:8px;
+background:var(--card);
 }
 
-/* SCROLL */
-#chatBox::-webkit-scrollbar{
-width:6px;
-}
-
-#chatBox::-webkit-scrollbar-thumb{
-background:rgba(255,255,255,0.2);
-border-radius:10px;
-}
-
-/* MAP */
-#map{
-height:280px;
-border-radius:16px;
-border:1px solid var(--border);
-overflow:hidden;
-}
-
-/* TYPOGRAPHY */
-h1,h2,h3{
-font-weight:600;
-letter-spacing:-0.03em;
-margin-bottom:10px;
-}
-
-p{
-color:var(--muted);
-}
-
-/* PERFORMANCE */
-.card, button, input{
-will-change:transform;
-}
-
+#map{height:260px;border-radius:12px;}
 </style>
 </head>
 
@@ -195,8 +93,7 @@ will-change:transform;
 
 <script>
 
-/* ======= ORIGINAL JS (UNCHANGED) ======= */
-
+/* ================= GLOBAL STATE ================= */
 let state = {
 lang: localStorage.getItem("lang") || "en",
 theme: localStorage.getItem("theme") || "light",
@@ -215,16 +112,19 @@ localStorage.setItem("lang",state.lang);
 localStorage.setItem("theme",state.theme);
 }
 
+/* ================= LANG ================= */
 const L={
 en:{login:"Login",signup:"Sign Up",welcome:"Welcome",chat:"Chat",back:"Back"},
 af:{login:"Aanmeld",signup:"Registreer",welcome:"Welkom",chat:"Gesels",back:"Terug"},
 osh:{login:"Log in",signup:"Sign up",welcome:"Wa uhala po",chat:"Ombi",back:"Shuna"}
 };
 
+/* ================= USER ================= */
 function user(){
 return state.db.citizens.find(u=>u.email===state.sessionId);
 }
 
+/* ================= INIT ================= */
 function init(){
 document.body.className = state.theme==="dark"?"dark":"";
 if(state.sessionId) home();
@@ -232,6 +132,7 @@ else login();
 }
 init();
 
+/* ================= LOGIN ================= */
 function login(){
 app.innerHTML=`
 <div class="card">
@@ -253,19 +154,20 @@ save();
 home();
 }
 
+/* ================= SIGNUP ================= */
 function signup(){
 app.innerHTML=`
 <div class="card">
 <h3>${L[state.lang].signup}</h3>
 
-<input id="fn">
-<input id="ln">
-<input id="phone">
-<input id="email">
-<input id="addr">
-<input id="meter">
-<input id="pass" type="password">
-<input id="cpass" type="password">
+<input id="fn" placeholder="First Name">
+<input id="ln" placeholder="Last Name">
+<input id="phone" placeholder="Phone">
+<input id="email" placeholder="Email">
+<input id="addr" placeholder="Address">
+<input id="meter" placeholder="Meter Number">
+<input id="pass" type="password" placeholder="Password">
+<input id="cpass" type="password" placeholder="Confirm">
 
 <button onclick="create()">Create</button>
 </div>`;
@@ -289,6 +191,7 @@ save();
 login();
 }
 
+/* ================= HOME ================= */
 function home(){
 let u = user();
 
@@ -310,6 +213,7 @@ app.innerHTML=`
 map();
 }
 
+/* ================= MAP ================= */
 function map(){
 setTimeout(()=>{
 let m=L.map('map').setView([-22.56,17.08],13);
@@ -323,6 +227,7 @@ L.marker([-22.56,17.08])
 },200);
 }
 
+/* ================= CHAT ================= */
 function chat(){
 app.innerHTML=`
 <div class="card">
@@ -350,6 +255,7 @@ state.db.logs.push(u.email+": "+msg.value);
 save();
 }
 
+/* ================= PROFILE ================= */
 function profile(){
 let u=user();
 
@@ -367,6 +273,7 @@ app.innerHTML=`
 </div>`;
 }
 
+/* ================= OUTAGE ================= */
 function outage(){
 state.db.events.push("OUTAGE");
 state.db.logs.push("OUTAGE REPORTED");
@@ -374,6 +281,7 @@ save();
 alert("Reported");
 }
 
+/* ================= UI ================= */
 function toggleTheme(){
 state.theme=state.theme==="dark"?"light":"dark";
 document.body.className=state.theme==="dark"?"dark":"";
@@ -391,4 +299,4 @@ home();
 </script>
 
 </body>
-</html>
+  </html>
