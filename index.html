@@ -2,798 +2,313 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Windhoek Call Center Demo 2026</title>
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Lucide Icons CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #1e40af;
-            --primary-light: #3b82f6;
-            --primary-dark: #1e3a8a;
-            --accent: #06b6d4;
-            --accent-light: #22d3ee;
-            --success: #16a34a;
-            --warning: #ea580c;
-            --danger: #dc2626;
-            --slate-900: #0f172a;
-            --slate-800: #1e293b;
-            --slate-700: #334155;
-            --slate-600: #475569;
-            --slate-500: #64748b;
-            --slate-400: #94a3b8;
-            --slate-300: #cbd5e1;
-            --slate-200: #e2e8f0;
-            --slate-100: #f1f5f9;
-            --slate-50: #f8fafc;
-            --white: #ffffff;
-            --bg: #f8fafc;
-            --text: #0f172a;
-            --text-light: #475569;
-            --border: #e2e8f0;
-        }
-
-        html {
-            font-family: 'Sora', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        }
-
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            font-weight: 400;
-        }
-
-        /* ==================== HEADER ==================== */
-        header {
-            background: linear-gradient(135deg, var(--slate-900) 0%, var(--slate-800) 100%);
-            color: white;
-            padding: 1rem 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 40;
-        }
-
-        .header-content {
-            max-width: 1280px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .header-logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
-            border-radius: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
-        .header-title h1 {
-            font-size: 1.25rem;
-            margin: 0;
-        }
-
-        .header-title p {
-            font-size: 0.75rem;
-            color: #cbd5e1;
-            margin: 0;
-        }
-
-        .header-user {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .user-info {
-            display: none;
-            text-align: right;
-            font-size: 0.875rem;
-        }
-
-        .user-info.visible {
-            display: block;
-        }
-
-        .user-info p {
-            margin: 0;
-        }
-
-        .logout-btn {
-            background-color: #dc2626;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.875rem;
-            transition: background-color 0.3s;
-            display: none;
-        }
-
-        .logout-btn:hover {
-            background-color: #b91c1c;
-        }
-
-        .logout-btn.visible {
-            display: block;
-        }
-
-        /* ==================== MAIN CONTAINER ==================== */
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 2rem 1rem;
-        }
-
-        /* ==================== LOGIN PAGE ==================== */
-        .login-page {
-            min-height: 100vh;
-            background: linear-gradient(135deg, var(--slate-900) 0%, var(--slate-800) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-
-        .login-card {
-            width: 100%;
-            max-width: 500px;
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 2rem;
-            color: white;
-        }
-
-        .login-logo {
-            width: 64px;
-            height: 64px;
-            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
-            border-radius: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1rem;
-            font-size: 2rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        .login-header h1 {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .login-header p {
-            color: #cbd5e1;
-            margin: 0.25rem 0;
-        }
-
-        .login-header .powered-by {
-            font-size: 0.75rem;
-            color: #94a3b8;
-            margin-top: 1rem;
-        }
-
-        .login-roles {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .role-card {
-            background: white;
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e2e8f0;
-        }
-
-        .role-title {
-            font-size: 1.125rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .role-title svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        .role-input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #cbd5e1;
-            border-radius: 0.5rem;
-            margin-bottom: 0.75rem;
-            font-size: 0.875rem;
-            font-family: 'Sora', sans-serif;
-        }
-
-        .role-input:focus {
-            outline: none;
-            ring: 2px solid var(--primary);
-            border-color: var(--primary);
-        }
-
-        .role-btn {
-            width: 100%;
-            padding: 0.75rem;
-            border: none;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.875rem;
-            transition: all 0.3s;
-            font-family: 'Sora', sans-serif;
-        }
-
-        .role-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .customer-btn {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .customer-btn:hover {
-            background-color: var(--primary-dark);
-        }
-
-        .agent-btn {
-            background-color: var(--warning);
-            color: white;
-        }
-
-        .agent-btn:hover {
-            background-color: #c2410c;
-        }
-
-        .admin-btn {
-            background-color: var(--success);
-            color: white;
-        }
-
-        .admin-btn:hover {
-            background-color: #15803d;
-        }
-
-        .role-hint {
-            font-size: 0.75rem;
-            color: var(--text-light);
-            margin-top: 0.5rem;
-        }
-
-        .login-footer {
-            text-align: center;
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: #94a3b8;
-            font-size: 0.75rem;
-        }
-
-        /* ==================== PAGES ==================== */
-        .page {
-            display: none;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        /* ==================== WELCOME BANNER ==================== */
-        .welcome-banner {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-            color: white;
-            border-radius: 0.75rem;
-            padding: 2rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .welcome-banner h1 {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .welcome-banner p {
-            color: rgba(255, 255, 255, 0.9);
-            margin: 0;
-        }
-
-        /* ==================== GRID LAYOUTS ==================== */
-        .grid {
-            display: grid;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .grid-2 {
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        }
-
-        .grid-3 {
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        }
-
-        .grid-4 {
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        }
-
-        /* ==================== CARDS ==================== */
-        .card {
-            background: white;
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--border);
-            transition: all 0.3s;
-        }
-
-        .card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .card-icon {
-            width: 32px;
-            height: 32px;
-            margin-bottom: 0.75rem;
-        }
-
-        .card-title {
-            font-size: 1.125rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: var(--text);
-        }
-
-        .card-description {
-            font-size: 0.875rem;
-            color: var(--text-light);
-            margin: 0;
-        }
-
-        .card-border-left {
-            border-left: 4px solid;
-        }
-
-        .border-blue {
-            border-left-color: var(--primary);
-        }
-
-        .border-green {
-            border-left-color: var(--success);
-        }
-
-        .border-amber {
-            border-left-color: var(--warning);
-        }
-
-        .border-purple {
-            border-left-color: #a855f7;
-        }
-
-        /* ==================== STAT CARDS ==================== */
-        .stat-card {
-            background: white;
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            border-top: 4px solid;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-label {
-            font-size: 0.875rem;
-            color: var(--text-light);
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-change {
-            font-size: 0.75rem;
-            color: var(--text-light);
-        }
-
-        /* ==================== BUTTONS ==================== */
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.875rem;
-            transition: all 0.3s;
-            font-family: 'Sora', sans-serif;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-dark);
-        }
-
-        .btn-secondary {
-            background-color: var(--slate-200);
-            color: var(--text);
-        }
-
-        .btn-secondary:hover {
-            background-color: var(--slate-300);
-        }
-
-        .btn-success {
-            background-color: var(--success);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background-color: #15803d;
-        }
-
-        .btn-danger {
-            background-color: var(--danger);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: #b91c1c;
-        }
-
-        .btn-full {
-            width: 100%;
-            justify-content: center;
-        }
-
-        /* ==================== FORMS ==================== */
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--text);
-        }
-
-        .form-input,
-        .form-select,
-        .form-textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-            font-family: 'Sora', sans-serif;
-            color: var(--text);
-        }
-
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        /* ==================== TABLES ==================== */
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.875rem;
-        }
-
-        .table thead {
-            background-color: var(--slate-50);
-            border-bottom: 2px solid var(--border);
-        }
-
-        .table th {
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .table td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .table tbody tr:hover {
-            background-color: var(--slate-50);
-        }
-
-        /* ==================== BADGES ==================== */
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .badge-green {
-            background-color: #dcfce7;
-            color: #166534;
-        }
-
-        .badge-red {
-            background-color: #fee2e2;
-            color: #991b1b;
-        }
-
-        .badge-amber {
-            background-color: #fef3c7;
-            color: #92400e;
-        }
-
-        .badge-blue {
-            background-color: #dbeafe;
-            color: #1e40af;
-        }
-
-        /* ==================== ALERTS ==================== */
-        .alert {
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-        }
-
-        .alert-success {
-            background-color: #dcfce7;
-            color: #166534;
-            border: 1px solid #bbf7d0;
-        }
-
-        .alert-error {
-            background-color: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
-        }
-
-        .alert-warning {
-            background-color: #fef3c7;
-            color: #92400e;
-            border: 1px solid #fde68a;
-        }
-
-        .alert-info {
-            background-color: #dbeafe;
-            color: #1e40af;
-            border: 1px solid #bfdbfe;
-        }
-
-        .alert-icon {
-            width: 20px;
-            height: 20px;
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-
-        /* ==================== CHAT ==================== */
-        .chat-container {
-            background: white;
-            border-radius: 0.75rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 400px;
-        }
-
-        .chat-header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-            color: white;
-            padding: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .chat-agent {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .chat-agent-avatar {
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .chat-agent-info h3 {
-            font-size: 0.875rem;
-            margin: 0;
-        }
-
-        .chat-agent-info p {
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.8);
-            margin: 0;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1rem;
-            background-color: var(--slate-50);
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .message {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .message.user {
-            justify-content: flex-end;
-        }
-
-        .message-bubble {
-            max-width: 70%;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-            line-height: 1.5;
-        }
-
-        .message.agent .message-bubble {
-            background-color: white;
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
-
-        .message.user .message-bubble {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .message-time {
-            font-size: 0.75rem;
-            color: var(--text-light);
-            margin-top: 0.25rem;
-        }
-
-        .chat-input {
-            padding: 1rem;
-            border-top: 1px solid var(--border);
-            background: white;
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .chat-input input {
-            flex: 1;
-            padding: 0.75rem;
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            font-family: 'Sora', sans-serif;
-            font-size: 0.875rem;
-        }
-
-        .chat-input input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .chat-send-btn {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .chat-send-btn:hover {
-            background-color: var(--primary-dark);
-        }
-
-        /* ==================== BACK BUTTON ==================== */
-        .back-btn {
-            color: var(--primary);
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.875rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-family: 'Sora', sans-serif;
-        }
-
-        .back-btn:hover {
-            color: var(--primary-dark);
-        }
-
-        /* ==================== FOOTER ==================== */
-        footer {
-            background-color: var(--slate-900);
-            color: #cbd5e1;
-            padding: 2rem 1rem;
-            margin-top: 3rem;
-        }
-
-        .footer-content {
-            max-width: 1280px;
-            margin: 0 auto;
-        }
-
-        .footer-grid {
-     
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Windhoek National Customer Operations Center</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+transition:.3s;
+background-size:cover;
+background-position:center;
+}
+
+header{
+display:flex;
+justify-content:space-between;
+padding:15px;
+background:rgba(0,0,0,.7);
+color:#fff;
+}
+
+.controls button{
+margin-left:10px;
+padding:5px 10px;
+cursor:pointer;
+}
+
+.container{padding:20px;}
+
+.card{
+background:rgba(255,255,255,.9);
+padding:15px;
+border-radius:10px;
+margin-bottom:15px;
+}
+
+.dark{background:#0f172a;color:#fff;}
+.dark .card{background:rgba(30,41,59,.95);}
+
+input,button{
+margin:5px 0;
+padding:8px;
+width:100%;
+}
+
+#chatBox{
+height:200px;
+overflow:auto;
+border:1px solid #ccc;
+margin-bottom:10px;
+padding:10px;
+}
+
+.profile{
+border-bottom:1px solid #ccc;
+padding:10px 0;
+}
+
+#map{height:250px;border-radius:10px;}
+</style>
+</head>
+
+<body>
+
+<header>
+<div><b>Windhoek National Customer Operations Center</b></div>
+<div class="controls">
+<button onclick="toggleTheme()">🌙</button>
+<button onclick="changeLang()">🌐</button>
+</div>
+</header>
+
+<div id="app" class="container"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+
+/* ================= STATE ================= */
+let state={
+lang:localStorage.getItem("lang")||"en",
+theme:localStorage.getItem("theme")||"light",
+users:JSON.parse(localStorage.getItem("users")||"[]"),
+tickets:JSON.parse(localStorage.getItem("tickets")||"[]"),
+notifications:[]
+};
+
+/* ================= SPLASH ================= */
+function splash(){
+let s=document.createElement("div");
+s.style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0f172a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;z-index:9999;";
+s.innerText="Windhoek Operations";
+document.body.appendChild(s);
+setTimeout(()=>{s.remove();loginScreen();},2500);
+}
+
+/* ================= LANG ================= */
+const i18n={
+en:{welcome:"Welcome"},
+af:{welcome:"Welkom"},
+osh:{welcome:"Wa uhala po"}
+};
+
+function changeLang(){
+let langs=["en","af","osh"];
+let i=langs.indexOf(state.lang);
+state.lang=langs[(i+1)%3];
+localStorage.setItem("lang",state.lang);
+}
+
+/* ================= THEME ================= */
+function toggleTheme(){
+document.body.classList.toggle("dark");
+}
+
+/* ================= LOGIN ================= */
+function loginScreen(){
+app.innerHTML=`
+<div class="card">
+<h3>Login</h3>
+<input id="email" placeholder="Email">
+<input id="pass" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+<button onclick="signupScreen()">Sign Up</button>
+</div>`;
+}
+
+/* ================= SIGNUP ================= */
+function signupScreen(){
+app.innerHTML=`
+<div class="card">
+<h3>Sign Up</h3>
+
+<input id="fn" placeholder="First Name">
+<input id="ln" placeholder="Last Name">
+<input id="phone" placeholder="Phone">
+<input id="email" placeholder="Email">
+<input id="addr" placeholder="Address">
+<input id="meter" placeholder="Meter Number">
+<input id="pass" type="password" placeholder="Password">
+<input id="cpass" type="password" placeholder="Confirm Password">
+
+<button onclick="signup()">Register</button>
+</div>`;
+}
+
+function signup(){
+if(pass.value!==cpass.value)return alert("Password mismatch");
+
+state.users.push({
+email:email.value,
+pass:pass.value,
+name:fn.value+" "+ln.value
+});
+
+localStorage.setItem("users",JSON.stringify(state.users));
+alert("Account created");
+loginScreen();
+}
+
+/* ================= LOGIN ================= */
+function login(){
+let u=state.users.find(x=>x.email===email.value && x.pass===pass.value);
+if(!u)return alert("Invalid login");
+
+state.user=u;
+home();
+}
+
+/* ================= HOME ================= */
+function home(){
+app.innerHTML=`
+<h2>${i18n[state.lang].welcome} ${state.user.name}</h2>
+
+<div class="card">
+<button onclick="outage()">Report Power Outage</button>
+<button onclick="support()">Technical Support</button>
+<button onclick="chat()">Speak to Representative</button>
+<button onclick="notifications()">Notifications</button>
+<button onclick="account()">My Account</button>
+<button onclick="agent()">Agent Panel</button>
+<button onclick="admin()">Admin Panel</button>
+</div>
+
+<div class="card">
+<h3>Live Map - Windhoek</h3>
+<div id="map"></div>
+</div>
+
+<div class="card">
+<h3>Support Team</h3>
+<div id="profiles"></div>
+</div>
+`;
+
+initMap();
+profiles();
+}
+
+/* ================= MAP ================= */
+function initMap(){
+let map=L.map('map').setView([-22.56,17.08],13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+L.marker([-22.56,17.08]).addTo(map).bindPopup("Operations Center").openPopup();
+}
+
+/* ================= PROFILES ================= */
+function profiles(){
+let data=[
+{name:"Maria K.",role:"Support Lead"},
+{name:"David N.",role:"Technical Specialist"}
+];
+let div=document.getElementById("profiles");
+data.forEach(p=>{
+div.innerHTML+=`<div class="profile"><b>${p.name}</b><br>${p.role}</div>`;
+});
+}
+
+/* ================= CHAT ================= */
+function chat(){
+app.innerHTML=`
+<div class="card">
+<h3>Chat</h3>
+<div id="chatBox"></div>
+<input id="msg">
+<button onclick="sendMsg()">Send</button>
+<button onclick="home()">Back</button>
+</div>`;
+}
+
+function sendMsg(){
+chatBox.innerHTML+=`<div><b>You:</b> ${msg.value}</div>`;
+setTimeout(()=>{
+chatBox.innerHTML+=`<div><b>Agent:</b> Issue received and being processed.</div>`;
+},800);
+}
+
+/* ================= OUTAGE ================= */
+function outage(){
+alert("Outage reported");
+}
+
+/* ================= SUPPORT ================= */
+function support(){
+app.innerHTML=`<div class="card">
+<h3>Technical Support</h3>
+<ul>
+<li>FAQs</li>
+<li>Safety Tips</li>
+<li>Voltage Info</li>
+</ul>
+<button onclick="home()">Back</button>
+</div>`;
+}
+
+/* ================= NOTIFICATIONS ================= */
+function notifications(){
+app.innerHTML=`<div class="card"><h3>Notifications</h3>
+<p>No critical alerts</p>
+<button onclick="home()">Back</button>
+</div>`;
+}
+
+/* ================= ACCOUNT ================= */
+function account(){
+app.innerHTML=`<div class="card">
+<h3>My Account</h3>
+<input value="${state.user.name}">
+<button onclick="home()">Save</button>
+</div>`;
+}
+
+/* ================= AGENT ================= */
+function agent(){
+app.innerHTML=`<div class="card">
+<h3>Agent Dashboard</h3>
+<p>Queue: ${Math.floor(Math.random()*5)}</p>
+<p>Active Calls: ${Math.floor(Math.random()*3)}</p>
+<button onclick="home()">Back</button>
+</div>`;
+}
+
+/* ================= ADMIN ================= */
+function admin(){
+app.innerHTML=`<div class="card">
+<h3>Admin Panel</h3>
+<p>Total Users: ${state.users.length}</p>
+<button onclick="home()">Back</button>
+</div>`;
+}
+
+/* ================= BACKGROUND ================= */
+const imgs=[
+"https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+"https://images.unsplash.com/photo-1494526585095-c41746248156"
+];
+
+setInterval(()=>{
+document.body.style.backgroundImage=`url(${imgs[Math.floor(Math.random()*imgs.length)]})`;
+},8000);
+
+/* INIT */
+splash();
+
+</script>
+
+</body>
+</html>
