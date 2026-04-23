@@ -3,20 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>National Digital Operations Platform</title>
+<title>National Operations Platform</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 <style>
 
-/* ===== PREMIUM EXTREME UI ===== */
+/* ===== PREMIUM EXTREME SYSTEM ===== */
 
 :root{
 --bg:#09090b;
 --text:#fafafa;
---muted:rgba(255,255,255,0.55);
+--muted:rgba(255,255,255,0.6);
 --border:rgba(255,255,255,0.08);
-
 --primary:#8b5cf6;
 --gradient:linear-gradient(135deg,#8b5cf6,#6366f1,#22d3ee);
 }
@@ -40,21 +39,22 @@ header{
 display:flex;
 justify-content:space-between;
 align-items:center;
-padding:20px 30px;
+padding:20px 28px;
 background:rgba(9,9,11,0.65);
-backdrop-filter:blur(24px);
+backdrop-filter:blur(20px);
 border-bottom:1px solid var(--border);
 position:sticky;
 top:0;
+z-index:10;
 }
 
-/* BUTTONS TOP */
+/* BUTTONS */
 .controls button{
-background:rgba(255,255,255,0.04);
+background:rgba(255,255,255,0.05);
 border:1px solid var(--border);
 border-radius:12px;
 padding:8px 12px;
-color:white;
+color:#fff;
 cursor:pointer;
 transition:.2s;
 }
@@ -66,7 +66,7 @@ background:rgba(139,92,246,0.2);
 /* LAYOUT */
 .container{
 padding:30px;
-max-width:1200px;
+max-width:1100px;
 margin:auto;
 }
 
@@ -77,13 +77,13 @@ border:1px solid var(--border);
 border-radius:18px;
 padding:26px;
 margin-bottom:20px;
-backdrop-filter:blur(20px);
+backdrop-filter:blur(18px);
 box-shadow:0 10px 40px rgba(0,0,0,0.4);
 transition:.25s;
 }
 
 .card:hover{
-transform:translateY(-6px);
+transform:translateY(-5px);
 border-color:rgba(139,92,246,0.5);
 }
 
@@ -95,12 +95,12 @@ margin:8px 0;
 border-radius:12px;
 border:1px solid var(--border);
 background:rgba(255,255,255,0.03);
-color:white;
+color:#fff;
 }
 
 input:focus{
 outline:none;
-border-color:#8b5cf6;
+border-color:var(--primary);
 box-shadow:0 0 0 2px rgba(139,92,246,0.3);
 }
 
@@ -113,7 +113,7 @@ border:none;
 border-radius:12px;
 font-weight:600;
 background:var(--gradient);
-color:white;
+color:#fff;
 cursor:pointer;
 transition:.2s;
 }
@@ -169,7 +169,7 @@ p{color:var(--muted);}
 
 <script>
 
-/* ===== CORE SYSTEM ===== */
+/* ===== GLOBAL STATE ===== */
 
 let state = {
 lang: localStorage.getItem("lang") || "en",
@@ -177,8 +177,9 @@ theme: localStorage.getItem("theme") || "dark",
 sessionId: localStorage.getItem("sessionId") || null,
 db: JSON.parse(localStorage.getItem("db") || JSON.stringify({
 citizens:[],
+tickets:[],
 logs:[],
-events:[]
+notifications:[]
 }))
 };
 
@@ -189,31 +190,42 @@ localStorage.setItem("lang",state.lang);
 localStorage.setItem("theme",state.theme);
 }
 
-/* LANG */
+/* ===== LANG ===== */
+
 const L={
 en:{login:"Login",signup:"Sign Up",welcome:"Welcome",chat:"Chat",back:"Back"},
 af:{login:"Aanmeld",signup:"Registreer",welcome:"Welkom",chat:"Gesels",back:"Terug"},
 osh:{login:"Log in",signup:"Sign up",welcome:"Wa uhala po",chat:"Ombi",back:"Shuna"}
 };
 
+function t(key){
+return L[state.lang][key] || key;
+}
+
+/* ===== USER ===== */
+
 function user(){
 return state.db.citizens.find(u=>u.email===state.sessionId);
 }
 
+/* ===== INIT ===== */
+
 function init(){
 document.body.className = state.theme==="dark"?"dark":"";
+state.db.notifications.push("System active");
 if(state.sessionId) home();
 else login();
 }
 init();
 
-/* LOGIN */
+/* ===== LOGIN ===== */
+
 function login(){
 app.innerHTML=`
 <div class="card">
-<h3>${L[state.lang].login}</h3>
-<input id="email">
-<input id="pass" type="password">
+<h3>${t("login")}</h3>
+<input id="email" placeholder="Email">
+<input id="pass" type="password" placeholder="Password">
 <button onclick="doLogin()">Login</button>
 <button onclick="signup()">Sign Up</button>
 </div>`;
@@ -221,34 +233,36 @@ app.innerHTML=`
 
 function doLogin(){
 let u = state.db.citizens.find(x=>x.email===email.value && x.pass===pass.value);
-if(!u)return alert("Invalid");
+if(!u)return alert("Invalid credentials");
 
 state.sessionId = u.email;
+state.db.logs.push("LOGIN "+u.email);
 save();
 home();
 }
 
-/* SIGNUP */
+/* ===== SIGNUP ===== */
+
 function signup(){
 app.innerHTML=`
 <div class="card">
-<h3>${L[state.lang].signup}</h3>
+<h3>${t("signup")}</h3>
 
-<input id="fn">
-<input id="ln">
-<input id="phone">
-<input id="email">
-<input id="addr">
-<input id="meter">
-<input id="pass" type="password">
-<input id="cpass" type="password">
+<input id="fn" placeholder="First Name">
+<input id="ln" placeholder="Last Name">
+<input id="phone" placeholder="Phone">
+<input id="email" placeholder="Email">
+<input id="addr" placeholder="Address">
+<input id="meter" placeholder="Meter Number">
+<input id="pass" type="password" placeholder="Password">
+<input id="cpass" type="password" placeholder="Confirm Password">
 
-<button onclick="create()">Create</button>
+<button onclick="create()">Create Account</button>
 </div>`;
 }
 
 function create(){
-if(pass.value!==cpass.value)return alert("Mismatch");
+if(pass.value!==cpass.value)return alert("Passwords mismatch");
 
 state.db.citizens.push({
 name:fn.value+" "+ln.value,
@@ -256,23 +270,28 @@ phone:phone.value,
 email:email.value,
 address:addr.value,
 meter:meter.value,
-pass:pass.value
+pass:pass.value,
+created:new Date().toISOString()
 });
 
+state.db.logs.push("REGISTER "+email.value);
 save();
 login();
 }
 
-/* HOME */
+/* ===== HOME ===== */
+
 function home(){
 let u=user();
 
 app.innerHTML=`
 <div class="card">
-<h3>${L[state.lang].welcome} ${u.name}</h3>
-<button onclick="chat()">Chat</button>
-<button onclick="outage()">Report Outage</button>
-<button onclick="profile()">Profile</button>
+<h3>${t("welcome")} ${u.name}</h3>
+<button onclick="chat()">Chat Support</button>
+<button onclick="createTicket()">Report Issue</button>
+<button onclick="profile()">My Profile</button>
+<button onclick="notifications()">Notifications</button>
+<button onclick="logout()">Logout</button>
 </div>
 
 <div class="card">
@@ -284,46 +303,65 @@ app.innerHTML=`
 map();
 }
 
-/* MAP */
+/* ===== MAP ===== */
+
 function map(){
 setTimeout(()=>{
 let m=L.map('map').setView([-22.56,17.08],13);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
-.addTo(m);
-
-L.marker([-22.56,17.08]).addTo(m);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m);
+L.marker([-22.56,17.08]).addTo(m).bindPopup("Control Center");
 },200);
 }
 
-/* CHAT */
+/* ===== CHAT ===== */
+
 function chat(){
 app.innerHTML=`
 <div class="card">
-<h3>${L[state.lang].chat}</h3>
+<h3>${t("chat")}</h3>
 <div id="chatBox"></div>
 <input id="msg">
 <button onclick="send()">Send</button>
-<button onclick="home()">${L[state.lang].back}</button>
+<button onclick="home()">${t("back")}</button>
 </div>`;
 }
 
 function send(){
 let u=user();
-chatBox.innerHTML+=`<div><b>${u.name}:</b> ${msg.value}</div>`;
+let text = msg.value;
 
-let r="Request received.";
-if(msg.value.includes("power")) r="Power issue logged.";
-if(msg.value.includes("bill")) r="Billing checked.";
+chatBox.innerHTML+=`<div><b>${u.name}:</b> ${text}</div>`;
+
+let response="Request logged.";
+if(text.toLowerCase().includes("power")) response="Power issue registered.";
+if(text.toLowerCase().includes("bill")) response="Billing review started.";
 
 setTimeout(()=>{
-chatBox.innerHTML+=`<div><b>System:</b> ${r}</div>`;
-},500);
+chatBox.innerHTML+=`<div><b>System:</b> ${response}</div>`;
+},600);
 
+state.db.logs.push("CHAT "+u.email+" "+text);
 save();
 }
 
-/* PROFILE */
+/* ===== TICKETS ===== */
+
+function createTicket(){
+let u=user();
+state.db.tickets.push({
+id:Date.now(),
+user:u.email,
+status:"open",
+date:new Date().toISOString()
+});
+
+state.db.notifications.push("Ticket created");
+save();
+alert("Ticket submitted");
+}
+
+/* ===== PROFILE ===== */
+
 function profile(){
 let u=user();
 
@@ -339,12 +377,27 @@ app.innerHTML=`
 </div>`;
 }
 
-/* OUTAGE */
-function outage(){
-alert("Outage reported");
+/* ===== NOTIFICATIONS ===== */
+
+function notifications(){
+let list = state.db.notifications.map(n=>`<p>${n}</p>`).join("");
+
+app.innerHTML=`
+<div class="card">
+<h3>Notifications</h3>
+${list}
+<button onclick="home()">Back</button>
+</div>`;
 }
 
-/* UI */
+/* ===== SYSTEM ===== */
+
+function logout(){
+state.sessionId=null;
+save();
+login();
+}
+
 function toggleTheme(){
 state.theme=state.theme==="dark"?"light":"dark";
 document.body.className=state.theme==="dark"?"dark":"";
@@ -362,4 +415,4 @@ home();
 </script>
 
 </body>
-</html>
+  </html>
